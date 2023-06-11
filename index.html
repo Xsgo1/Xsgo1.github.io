@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta>
+    <title>Title</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 轮播图盒子样式 */
+    .lunbotu {
+      position: relative;
+      width: 1242px;
+      height: 2208px;
+      background-color: transparent;
+      overflow: hidden;
+    }
+
+    /* 左右按钮样式 */
+    .left,
+    .right {
+      display: none;
+      position: absolute;
+      top: 50%;
+      margin-top: -15px;
+      width: 1px;
+      height: 1px;
+      background-color: cornsilk;
+      border-radius:50%;
+      text-align: center;
+      line-height: 30px;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .left {
+      left: 0;
+    }
+
+    .right {
+
+      right: 0;
+    }
+
+
+    li {
+      list-style: none;
+    }
+
+    /* 设置图片的ul的样式 */
+    .firstul {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 500%;
+
+    }
+
+    .firstul li {
+      float: left;
+      /* display: none; */
+    }
+
+    /* 设置小圆圈的样式 */
+    ol {
+      /* width: 90px; */
+      padding: 0 5px 0 5px;
+      position: absolute;
+      bottom: 10px;
+      left: 20%;
+      margin-left: -45px;
+      background-color: transparent;
+      text-align: center;
+      border-radius: 9px;
+    }
+
+    ol li {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 5px;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    .current {
+      background-color: black;
+    }
+
+  </style>
+  <script src="animation.js"></script>
+</head>
+
+<body>
+<!-- 图片大小全部是520*280 -->
+<div class="lunbotu">
+  <!-- 左右按钮 -->
+  <div class="left">></div>
+  <div class="right"><</div>
+  <!-- 图片部分 -->
+  <ul class="firstul">
+    <li><a href=""><img src=" img/1.jpg" alt=""> </a></li>
+    <li><a href=""><img src=" img/2.jpg" alt=""> </a></li>
+    <li><a href=""><img src=" img/3.jpg" alt=""> </a></li>
+    <li><a href=""><img src=" img/4.jpg" alt=""> </a></li>
+  </ul>
+  <!-- 小圆圈 -->
+  <ol class="firstol"></ol>
+</div>
+<!-- JS部分 -->
+<script>
+  // 1.获取事件源
+  var lunbotu = document.querySelector('.lunbotu');
+  var leftBox = document.querySelector('.left');
+  var rightBox = document.querySelector('.right');
+  var ul = lunbotu.querySelector('ul');
+  var ol = lunbotu.querySelector('ol');
+  var right = document.querySelector('.right');
+  var left = document.querySelector('.left');
+  var lunbotuWidth = lunbotu.offsetWidth;
+  // console.log(ul)
+  // console.log(ol)
+  // 第一步：
+  // 鼠标经过轮播图的时候，左右小按钮弹出
+  lunbotu.addEventListener('mouseenter', function () {
+    leftBox.style.display = 'block';
+    rightBox.style.display = 'block';
+    // 鼠标经过轮播图的时候，停止定时器
+    clearInterval(timer);
+  })
+  // 鼠标离开轮播图的时候，左右小按钮隐藏
+  lunbotu.addEventListener('mouseleave', function () {
+    leftBox.style.display = 'none';
+    rightBox.style.display = 'none';
+    timer = setInterval(function () {
+      right.click();
+    }, 2000)
+
+  })
+  // 第二步：
+  // 1.动态生成小圆圈
+  // 2.小圆圈的个数要跟图片一样
+  // 3.先得到ul里面图片的张数(图片放入li里面，所以就是li的个数)
+  // 4.利用循环动态生成小圆圈(这个小圆圈要放入ol里面)
+  // 5.创建节点createElement('li')]
+  // 6.插入节点ol.appendChild(li)
+  // 7.第一个小圆圈需要添加current类
+  for (var i = 0; i < ul.children.length; i++) {
+    // 创建一个li
+    var li = document.createElement('li')
+    // 记录当前小圆圈的索引号 通过自定义属性来做
+    li.setAttribute('index', i);
+    // 把li添加到ol
+    ol.appendChild(li);
+  }
+  // 排他思想：让小Li变白色
+  for (var i = 0; i < ol.children.length; i++) {
+    ol.children[i].addEventListener('click', function () {
+      for (var i = 0; i < ol.children.length; i++) {
+        ol.children[i].className = '';
+      } this.className = 'current';
+
+      // 点击小圆圈的时候切换到对应的图片
+      // 得到索引号 index
+      var index = this.getAttribute('index');
+      // 解决小bug
+      num = index;
+      num_ol = index;
+      // console.log(lunbotuWidth);
+      // console.log(index)
+      animation(ul, - index * lunbotuWidth)
+    })
+  }
+  // 给第一个li变颜色
+  ol.children[0].className = 'current';
+  // 克隆第一个li
+  var first = ul.children[0].cloneNode(true);
+  ul.appendChild(first);
+  // 第三步:
+  // 点击右边按钮事件
+  var num = 0;
+  // 点击右侧按钮的时候小圆圈跟着滚动
+  var num_ol = 0;
+  // 节流阀，防止点击过快，最后才加这句优化
+  var flag = true;
+  // 右侧按钮：
+  right.addEventListener('click', function () {
+    if (flag) {
+      flag = false; // 关闭节流阀
+      if (num == ul.children.length - 1) {
+        ul.style.left = 0;
+        num = 0;
+      }
+      num++;
+      animation(ul, -num * lunbotuWidth, function () {
+        flag = true;
+      });
+      num_ol++;
+      if (num_ol == ol.children.length) {
+        num_ol = 0
+      }
+      for (var i = 0; i < ol.children.length; i++) {
+        ol.children[i].className = '';
+      }
+      ol.children[num_ol].className = 'current';
+    }
+  });
+  // 左侧按钮：
+  left.addEventListener('click', function () {
+    if (flag) {
+      flag = false;
+      if (num == 0) {
+        ul.style.left = -(ul.children.length - 1) * lunbotuWidth + 'px';
+        num = ul.children.length - 1;
+      }
+      num--;
+      animation(ul, -num * lunbotuWidth, function () {
+        flag = true;
+      });
+      num_ol--;
+      // num_ol=0的时候需要，点击左侧按钮，需要转跳到ol.children.length-1的位置
+      if (num_ol < 0) {
+        num_ol = ol.children.length - 1
+      }
+      for (var i = 0; i < ol.children.length; i++) {
+        ol.children[i].className = '';
+      }
+      ol.children[num_ol].className = 'current';
+    }
+  });
+  // 自动播放图片
+  var timer = setInterval(function () {
+    right.click();
+  }, 2000)
+</script>
+</body>
+</html>
