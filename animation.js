@@ -7,7 +7,7 @@ function animation(obj,target,fn1){
     obj.timer = setInterval(function(){
         // 步长计算公式 越来越小
         // 步长取整
-        var step = (target - obj.offsetLeft) /10;
+        var step = (target - obj.offsetLeft) /20;
         step = step > 0 ? Math.ceil(step) :Math.floor(step);
 
         if(obj.offsetLeft == target){
